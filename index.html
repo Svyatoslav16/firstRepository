@@ -1,0 +1,341 @@
+    <!DOCTYPE HTML>
+    <html>
+        <head>
+            <meta charset="utf-8">
+            <script src="js/jquery.min.js"></script>
+        </head>
+        <body>
+            <br><br><br><br><br><br><br><br><br><br>
+            <br><br><br><br><br><br><br><br><br><br>            
+            <input id="date" value="" />
+        </body>
+    </html>
+         <style>
+
+            body {
+                font-family: sans-serif;
+                font-size: 12px;
+            }
+
+            table {
+                width: 160px;
+                border-collapse: collapse;
+            }
+
+            td, th {
+                padding: 8px;
+                text-align: center;
+            }
+            
+            td:hover {
+                border-radius: 15px;
+                background-color: #e5e5e5;
+            }
+
+            table caption {
+                border-radius: 8px 8px 0 0;
+                position: relative;
+                color: white;
+                padding: 5px 10px;
+                background-color: #f75020;
+            }
+
+            #borderRadius {
+                color: white;
+                background-color: #f75020;
+            }
+
+            #td2, #td3, #td4, #td5, #td6 {
+                border-top: 1px solid white;
+            }
+
+            #date {
+                width: 240px;
+                text-align: center;
+                height: 19px;
+                border: 1px solid black;
+                border-radius: 10px;
+                color: black;
+                padding: 0px;
+            }
+            
+            #nextMonth, #previousMonth {
+                padding: 0px 10px;
+                font-size: 16px;
+            }
+            
+            #nextMonth:hover, 
+            #previousMonth:hover {
+                background-color: #de481d;
+            }
+
+            #nextMonth {
+                position: absolute;
+                right: 6px;
+            }
+
+            #previousMonth {
+                position: absolute;
+                left: 5px;
+            }
+
+            #dateAoutput {
+                font-size: 18px;
+                padding: 0px 3px 0px 3px; 
+            }
+
+            .firstClick, .secondClick {
+                background: #f75020;
+                color: white;
+                border-radius: 15px;
+            }
+
+            #ok {
+                border-radius: 0 0 8px 8px;
+                color: white;
+                background: #f75020;
+                width: 212px;
+                border: 0;
+                padding: 5px 0 5px 0;
+            }
+
+            #ok:focus, input:focus {
+                outline: 0;
+            }
+
+            #previousMonth, #nextMonth, td, #ok {
+                cursor: pointer;
+            }
+        </style>
+
+        <script>
+            $('<div id="calendar"></div>').insertAfter('#date');
+            let months = {
+                jan : 0,
+                oct : 9,
+                nov : 10,
+                dec : 11
+
+            };
+            let days = {
+                mon : 0,
+                sun : 6
+            };
+            const clickOnCellMagnificationValue = 0.51;
+            const one = 1;
+            const minusOne = -1;
+            const twelth = 12;
+            const daysInWeek = 7;
+            const sunday = daysInWeek - 1;
+            const clickOnCellOriginalValue = 1;
+            let chosenDay1;
+            let ChosenMonth;
+            let ChosenYear;
+            let chosenDay2;
+            let clickOnCell = clickOnCellOriginalValue;
+            let clickOnCellIncreasedByOne = clickOnCell + clickOnCellMagnificationValue;
+            let clickOnCellIncreasedByTwo = clickOnCellIncreasedByOne + clickOnCellMagnificationValue;
+            let today = new Date();
+            let month = today.getMonth();
+            const calendar = document.getElementById('calendar');
+            let monthIncreasedByOne = month + one;
+            let dayInput = today.getDate();
+            let monthInput = today.getMonth() + 1;
+            let year = today.getFullYear();
+            let hours = today.getHours(); 
+            let minutes = today.getMinutes(); 
+            let monthName= ['Январь','Февраль','Март','Апрель',
+                            'Май','Июнь','Июль','Август',
+                            'Сентябрь','Октябрь','Ноябрь','Декабрь'];
+
+            hours = (hours < 10) ? '0' + hours : hours;
+            minutes = (minutes < 10) ? '0' + minutes : minutes;
+            dayInput = (dayInput < 10) ? '0' + dayInput : dayInput;  
+            monthInput = (monthInput < 10) ? '0' + monthInput : monthInput;
+
+            document.getElementById('date').value = dayInput + '.' + monthInput + '.' + year + ' ' + hours + ':' + minutes ;
+
+            $("#calendar").on( "click", "td", function() {
+                    if (clickOnCell >= clickOnCell < clickOnCellIncreasedByTwo  && !$(this).hasClass('firstClick') && !$(this).hasClass('secondClick') ) { 
+                        if (clickOnCell == clickOnCellOriginalValue && !$(this).hasClass('firstclick')) {
+                            $(this).addClass('firstClick'); 
+                            clickOnCell += clickOnCellMagnificationValue;
+                            chosenDay1 = $( this ).text();
+                            ChosenMonth = month + one;
+                            ChosenYear = year;
+                        } else if(clickOnCell == clickOnCellIncreasedByOne && !$(this).hasClass('secondclick') ) {
+                            $(this).addClass('secondClick'); 
+                            clickOnCell += clickOnCellMagnificationValue;
+                            chosenDay2 = $( this ).text();
+                        }
+                    } else if($(this).hasClass('firstClick')){ 
+                        $( this ).removeClass('firstClick'); 
+                        clickOnCell -= clickOnCellMagnificationValue;
+                        chosenDay1 = '';
+                    } else if($(this).hasClass('secondClick')){ 
+                        $( this ).removeClass('secondClick'); 
+                        clickOnCell -= clickOnCellMagnificationValue;
+                        chosenDay2 = '';
+                    }
+                    }
+            )
+
+            $("#calendar").on("click", "#ok", function() {        
+                $('#calendar').empty();
+                $('#date').val(function () {
+                    let spandate = '';
+                    let spandateWithoutInterval = '';
+                    let partOfInterval1 = '';
+                    let partOfInterval2 = '';
+
+                    if (clickOnCell > clickOnCellOriginalValue) monthIncreasedByOne = month + one;
+              
+                    if (chosenDay1 != '' && chosenDay1 < 10) {
+                            if (ChosenMonth < months.nov) {
+                                partOfInterval1 = '0' + chosenDay1 + '.' +  '0' + ChosenMonth + '.' + ChosenYear + ' 12:00';
+                            } else if(ChosenMonth > months.oct) {
+                                partOfInterval1 = '0' + chosenDay1 + '.' + ChosenMonth + '.' + ChosenYear + ' 12:00';
+                            }
+                    } else if (chosenDay1 > months.oct) {
+                            if (ChosenMonth < months.nov) {
+                                partOfInterval1 = chosenDay1 + '.' +  '0' + ChosenMonth + '.' + ChosenYear + ' 12:00';
+                            } else if(ChosenMonth > months.oct) {
+                                partOfInterval1 = chosenDay1 + '.' + ChosenMonth + '.' + ChosenYear + ' 12:00';
+                            }
+                    } 
+
+                    if (chosenDay2 != '') {
+                        if (chosenDay2 < months.nov) {
+                            if (monthIncreasedByOne < months.nov) {
+                                partOfInterval2 = '0' + chosenDay2 + '.' +  '0' + monthIncreasedByOne + '.' + year + ' 12:00';
+                            } else if (monthIncreasedByOne > months.oct) {
+                                partOfInterval2 = '0' + chosenDay2 + '.' + monthIncreasedByOne + '.' + year + ' 12:00';
+                            }
+                        } else if (chosenDay2 > months.oct) {
+                            if (monthIncreasedByOne < months.nov) {
+                                partOfInterval2 = chosenDay2 + '.' +  '0' + monthIncreasedByOne + '.' + year + ' 12:00';
+                            } else if (monthIncreasedByOne > months.oct) {
+                                partOfInterval2 = chosenDay2 + '.' + monthIncreasedByOne + '.' + year + ' 12:00';
+                            }
+                        }
+                    }
+
+                    if (partOfInterval1 != '' && partOfInterval2 == '') {
+                        spandateWithoutInterval = partOfInterval1;
+                        clickOnCell -= clickOnCellMagnificationValue;
+                        return spandateWithoutInterval;
+                    } else if (partOfInterval1 == '' && partOfInterval2 != '') {
+                        spandateWithoutInterval = partOfInterval2;
+                        clickOnCell -= clickOnCellMagnificationValue;
+                        return spandateWithoutInterval;
+                    } else if (partOfInterval1 != '' && partOfInterval2 != '' && clickOnCell == clickOnCellIncreasedByTwo) {
+                        spandate = partOfInterval1 + ' - ' + partOfInterval2;
+                        clickOnCell = clickOnCellOriginalValue;
+                        chosenDay1 = '';
+                        chosenDay2 = '';
+                        return spandate; 
+                    }
+                })
+            })
+
+            $("#date").click(function() {
+                    let coords = this.getBoundingClientRect();
+                    $('#calendar').css({'position':'absolute', 'left': coords.left + 15 + "px", 'top': coords.top -270 + "px"});
+                    clickOnCell = clickOnCellOriginalValue;
+                    if ($('#calendar').length) {
+                        createCalendar("calendar", year,month);
+                    } 
+                }
+            )
+
+            $("#calendar").on( "click", "#nextMonth", function() {
+                $('#calendar').empty();
+                    if (month >= months.jan && month <= months.dec) {
+                        month++;
+                        createCalendar("calendar", year,month);
+                    }
+                    if(month == minusOne || month == months.jan || month == twelth) {
+                        month = months.dec;
+                        createCalendar("calendar", year, month);
+                        month++;
+                    }
+                    if(month == twelth) {
+                        month = months.jan;
+                        year++
+                        createCalendar("calendar", year, month);
+                    }  
+            })
+            
+            $("#calendar").on( "click", "#previousMonth", function() {
+                $('#calendar').empty();
+                    if (month >= months.jan && month <= months.dec) {
+                        month--;
+                        createCalendar("calendar", year, month);
+                    }
+                    if (month < months.jan || month > months.dec ) {
+                        month = months.dec;
+                        year--;
+                        createCalendar("calendar", year, month);
+                    }
+            })
+
+            function createCalendar(id, year, month) {
+                let date = new Date(year, month);
+                let table = getTable();
+
+                for (let i = 0; i < getDay(date); i++ ) table += '<td></td>';
+                      
+                for (i = 0; date.getMonth() == month; i++) {
+                    table += '<td id=' + i + '>' + date.getDate() + '</td>';
+                     if (getDay(date) % daysInWeek == sunday) { // вс, последний день - перевод строки
+                         table += '</tr><tr>';
+                     }
+                    date.setDate(date.getDate() + one);
+                }
+                if (getDay(date) != days.mon) {
+                    for (let i = getDay(date); i < daysInWeek; i++) {
+                        table += createCell();
+                    }
+                }
+                table += closeTable();
+                calendar.innerHTML = table;
+                $('#calendar').append(okButton() )
+            }
+
+            function getTable () {
+               return   '<table>'+
+                            '<caption>'+
+                                '<span id="previousMonth"> < </span>' + 
+                                '<span id="dateAoutput">' + monthName[month] + ' ' + year + '</span>' +
+                                '<span id="nextMonth"> > </span>' +
+                            '</caption>'   +
+                            '<tr id="borderRadius">' + 
+                               '<th id="td1">пн</th>' +
+                               '<th id="td2">вт</th>' + 
+                               '<th id="td3">ср</th>'+
+                               '<th id="td4">чт</th>' + 
+                               '<th id="td5">пт</th>' + 
+                               '<th id="td6">сб</th>' + 
+                               '<th id="td7">вс</th>' + 
+                            '</tr>' + 
+                        '<tr>';
+            }
+
+            function okButton () {
+                return '<button id="ok">OK</button>';
+            }
+
+            function getDay(date) {
+                let day = date.getDay();
+                    if (day == days.mon) day = daysInWeek;
+                        return day - one;
+            }
+
+            function closeTable() {
+                return '</tr></table>';
+            }
+
+            function createCell() {
+                return '<td></td>';
+            }
+        </script>
